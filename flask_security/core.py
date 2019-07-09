@@ -56,11 +56,12 @@ from .utils import (
     verify_hash,
 )
 from .views import create_blueprint
-from .cache import VerifyHashCache
+from .cache import VerifyHashCache, VerifyHashCacheRedis
 
 # Convenient references
 _security = LocalProxy(lambda: current_app.extensions["security"])
-local_cache = Local()
+#local_cache = Local()
+verifyCache = None
 
 
 #: Default Flask-Security configuration
@@ -326,6 +327,7 @@ def _request_loader(request):
             token = data.get(args_key, token)
 
     use_cache = cv("USE_VERIFY_PASSWORD_CACHE")
+    use_redis = cv("VERIFY_HASH_USE_REDIS", default=False)
 
     try:
         data = _security.remember_token_serializer.loads(
@@ -338,14 +340,13 @@ def _request_loader(request):
     if not user:
         return _security.login_manager.anonymous_user()
     if use_cache:
-        cache = getattr(local_cache, "verify_hash_cache", None)
-        if cache is None:
-            cache = VerifyHashCache()
-            local_cache.verify_hash_cache = cache
-        if cache.has_verify_hash_cache(user):
+        global verifyCache
+        if (verifyCache is None):
+            verifyCache = VerifyHashCacheRedis() if use_redis else VerifyHashCache()
+        if verifyCache.has_verify_hash_cache(user):
             return user
         if verify_hash(data[1], user.password):
-            cache.set_cache(user)
+            verifyCache.set_cache(user)
             return user
     else:
         if verify_hash(data[1], user.password):

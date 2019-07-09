@@ -104,7 +104,15 @@ Core
                                          Rules are the ones of TTLCache of
                                          cachetools package. Defaults to
                                          ``500``
-``SECURITY_VERIFY_HASH_CACHE_TTL``       Time to live for password check cache entries.
+``SECURITY_VERIFY_HASH_CACHE_TTL``       Time to live for password check cache entries. 
+                                         Supported by both TTLCache and Redis methods.
+``SECURITY_VERIFY_HASH_USE_REDIS``       Use Redis instead of TTLCache
+                                         Excellent for gunicorn or multi-threaded environments.
+                                         Defaults to ``False``
+``SECURITY_VERIFY_HASH_REDIS_SERVER``    Defaults to ``localhost``
+``SECURITY_VERIFY_HASH_REDIS_PORT``      Defaults to ``6379``
+``SECURITY_VERIFY_HASH_REDIS_PASSWORD``  Defaults to ``None``
+``SECURITY_VERIFY_HASH_REDIS_DB``        Defaults to ``0``
                                          Defaults to ``300`` (5 minutes)
 ``SECURITY_REDIRECT_BEHAVIOR``           Passwordless login, confirmation, and
                                          reset password have GET endpoints that validate
